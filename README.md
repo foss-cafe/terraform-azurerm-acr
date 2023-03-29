@@ -4,6 +4,15 @@
 ## How to use it as a module
 
 ```hcl
+module "acr" {
+  source  = "app.terraform.io/foss-cafe/acr/azurerm"
+  version = "1.0.0"
+  name                = "iba6yu5bgopi"
+  resource_group_name = "terraform-test"
+  location            = "East US"
+  sku                 = "Premium"
+  admin_enabled       = true
+}
 
 ```
 
