@@ -15,10 +15,10 @@ resource "azurerm_container_registry" "this" {
     for_each = length(var.georeplications) != 0 && var.sku == "Premium" ? var.georeplications : []
 
     content {
-      location                  = try(georeplications.value, "location")
-      regional_endpoint_enabled = try(georeplications.value, "regional_endpoint_enabled", false)
-      zone_redundancy_enabled   = try(georeplications.value, "zone_redundancy_enabled", false)
-      tags                      = try(georeplications.value, "tags", {})
+      location                  = try(georeplications.value.location)
+      regional_endpoint_enabled = try(georeplications.value.regional_endpoint_enabled, false)
+      zone_redundancy_enabled   = try(georeplications.value.zone_redundancy_enabled, false)
+      tags                      = try(georeplications.value.tags, {})
     }
   }
 
@@ -26,23 +26,23 @@ resource "azurerm_container_registry" "this" {
     for_each = length(var.network_rule_set) != 0 && var.sku == "Premium" ? var.network_rule_set : []
 
     content {
-      default_action = try(network_rule_set.value, "default_action", Allow)
+      default_action = try(network_rule_set.value.default_action, Allow)
 
       dynamic "ip_rule" {
-        for_each = try(network_rule_set.value, "ip_rule", [])
+        for_each = try(network_rule_set.value.ip_rule, [])
 
         content {
           action   = "Allow"
-          ip_range = try(ip_rule.value, "ip_range")
+          ip_range = try(ip_rule.value.ip_range)
         }
       }
 
       dynamic "virtual_network" {
-        for_each = try(network_rule_set.value, "virtual_network", [])
+        for_each = try(network_rule_set.value.virtual_network, [])
 
         content {
           action    = "Allow"
-          subnet_id = try(virtual_network.value, "subnet_id")
+          subnet_id = try(virtual_network.value.subnet_id)
         }
       }
 
@@ -57,17 +57,17 @@ resource "azurerm_container_registry" "this" {
     for_each = length(var.retention_policy) != 0 ? var.retention_policy : []
 
     content {
-      days    = try(retention_policy.value, "days", 30)
-      enabled = try(retention_policy.value, "enabled", true)
+      days    = try(retention_policy.value.days, 7)
+      enabled = try(retention_policy.value.enabled, true)
     }
 
   }
 
   dynamic "trust_policy" {
-    for_each = length(var.trust_policy) != 0 ? var.trust_policy : []
+    for_each = var.trust_policy
 
     content {
-      enabled = try(trust_policy.value, "enabled", true)
+      enabled = try(trust_policy.value.enabled, true)
     }
   }
 
@@ -86,8 +86,8 @@ resource "azurerm_container_registry" "this" {
     for_each = length(var.identity) != 0 ? var.identity : []
 
     content {
-      type         = try(identity.value, "type")
-      identity_ids = try(identity.value, "identity_ids", [])
+      type         = try(identity.value.type)
+      identity_ids = try(identity.value.identity_ids, [])
     }
   }
 
@@ -95,9 +95,9 @@ resource "azurerm_container_registry" "this" {
     for_each = length(var.encryption) != 0 && length(var.identity) != 0 ? var.encryption : []
 
     content {
-      enabled            = try(encryption.value, "enabled", true)
-      key_vault_key_id   = try(encryption.value, "key_vault_key_id")
-      identity_client_id = try(encryption.value, "identity_client_id")
+      enabled            = try(encryption.value.enabled, true)
+      key_vault_key_id   = try(encryption.value.key_vault_key_id)
+      identity_client_id = try(encryption.value.identity_client_id)
     }
   }
 
